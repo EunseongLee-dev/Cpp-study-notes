@@ -1,0 +1,113 @@
+# C++ 기초 복습: 연산자와 조건문
+
+## 1. 대입 연산자
+- `=` : 변수에 값을 대입
+```cpp
+int data = 10;
+data = 20;
+data += 5;  // data = data + 5;
+```
+
+## 2. 산술 연산자
+- `+`, `-`, `*`, `/`, `%` (모듈러스, 정수만 사용 가능)
+```cpp
+int a = 10 + 10; // 20
+int b = 10 / 3;  // 3
+int c = 10 % 3;  // 1
+```
+- 실수 상수: 뒤에 `f`를 붙이면 float, 없으면 double
+```cpp
+float f1 = 10.5f; 
+double d1 = 10.5;
+```
+
+## 3. 증감 연산자
+- 전위 `++data` : 먼저 증가 후 사용
+- 후위 `data++` : 먼저 사용 후 증가
+- 가능하면 전위 사용 권장
+```cpp
+int data = 0;
+++data; // 1
+data++; // 2
+```
+
+## 4. 논리 연산자
+- `!` : 부정, `&&` : AND, `||` : OR
+- bool 자료형: True(1), False(0)
+```cpp
+bool isTrue = true;
+bool isFalse = !isTrue; // false
+```
+- `!`는 조건을 뒤집어 True/False 반환
+
+## 5. 비교 연산자
+- `==`, `!=`, `<`, `>`, `<=`, `>=`
+```cpp
+if(a != 10) { ... }
+```
+
+## 6. 조건문
+### 6-1. if / else if / else
+```cpp
+if(hp < 0) {
+    std::cout << "Game Over" << std::endl;
+}
+else if(hp > 50) {
+    std::cout << "Safe Zone" << std::endl;
+}
+else {
+    std::cout << "Danger Zone" << std::endl;
+}
+```
+
+### 6-2. switch
+```cpp
+switch(hp) {
+case 0:
+    std::cout << "Last Chance" << std::endl;
+    break;
+case 10:
+    std::cout << "Safe" << std::endl;
+    break;
+default:
+    std::cout << "Normal" << std::endl;
+    break;
+}
+```
+
+### 6-3. 삼항 연산자
+- `조건 ? 참일때 실행 : 거짓일때 실행`
+```cpp
+int a = 10;
+a == 10 ? a = 100 : a = 200;
+```
+- 가독성 때문에 일반적으로 if / else 권장
+
+## 7. 오늘 학습 문제 예제
+```cpp
+#include <iostream>
+
+int main() {
+    int mana = 20;
+    bool hasItem = true;
+
+    if (mana >= 30 && hasItem) {
+        std::cout << "You can use the magic item!" << std::endl;
+    }
+    else if (mana >= 30 && !hasItem) {
+        std::cout << "You cannot use the magic item" << std::endl;
+    }
+    else {
+        std::cout << "You cannot use the magic item" << std::endl;
+    }
+
+    mana == 100 ? std::cout << "Full Power!" << std::endl : std::cout << "Keep some mana" << std::endl;
+
+    return 0;
+}
+```
+- if문 조건 분리
+  - `mana >= 30 && hasItem` : 아이템 사용 가능
+  - `mana >= 30 && !hasItem` : 아이템 없음
+  - else : 마나 부족
+- 삼항 연산자로 마나 상태 확인
