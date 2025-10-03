@@ -1,0 +1,117 @@
+# C++ 비트 연산자 & #define 정리
+
+## 1. 상수 정의 - `#define`
+```cpp
+#define POISON 0x1   // 2진수 0001
+#define STUN   0x2   // 2진수 0010
+#define SHIELD 0x4   // 2진수 0100
+```
+- 상수값을 이름으로 정의해서 코드 가독성 향상
+- 16진수, 2진수와 대응 가능 (`0x1 = 1, 0x2 = 2, 0x4 = 4`)
+
+---
+
+## 2. 비트 연산자
+
+### 2-1. 쉬프트 연산
+```cpp
+unsigned byte = 10;
+byte <<= 3; // 왼쪽으로 3비트 이동 → 10 * 2^3 = 80
+byte >>= 1; // 오른쪽으로 1비트 이동 → 80 / 2 = 40
+```
+- `<<` : 2배씩 증가 (배수 계산)
+- `>>` : 2배씩 감소 (몫 계산)
+
+### 2-2. 비트 논리 연산
+```cpp
+&  : 둘 다 1 → 1
+|  : 둘 중 하나라도 1 → 1
+^  : 같으면 0, 다르면 1
+~  : 0 ↔ 1 (반전)
+```
+
+---
+
+## 3. 비트 연산자 활용 예시
+
+### 3-1. 상태 추가
+```cpp
+int status = 0;
+status |= POISON;  // 상태에 POISON 추가
+status |= SHIELD;  // 상태에 SHIELD 추가
+status |= (POISON | SHIELD); // 여러 상태 한 번에 추가 가능
+```
+
+### 3-2. 상태 체크
+```cpp
+if (status & STUN) {
+    std::cout << "Character is stunned!" << std::endl;
+}
+```
+
+### 3-3. 상태 제거
+```cpp
+status &= ~SHIELD; // SHIELD 상태 제거
+```
+
+---
+
+## 4. 예제 코드 1 - `#define` 사용
+```cpp
+#include <iostream>
+#define POISON 0x1
+#define STUN   0x2
+#define SHIELD 0x4
+
+int main() {
+    int status = 0;
+    status |= (POISON | SHIELD);
+
+    if (status & STUN) {
+        std::cout << "Character is stunned!" << std::endl;
+    }
+
+    status &= ~SHIELD;
+
+    std::cout << status << std::endl; // 남아있는 상태 출력
+    return 0;
+}
+```
+
+---
+
+## 5. 예제 코드 2 - `enum` 사용
+```cpp
+#include <iostream>
+
+enum Status {
+    NONE = 0,
+    POISON = 1,
+    STUN = 2,
+    SHIELD = 4
+};
+
+int main() {
+    int use = 0;
+    use |= (POISON | STUN);
+
+    if (use & POISON) {
+        std::cout << "Poisoned!" << std::endl;
+    }
+
+    use &= ~STUN;
+
+    std::cout << use << std::endl; // 남아있는 상태 출력
+    return 0;
+}
+```
+
+---
+
+## 6. 정리
+- `#define`과 `enum` 모두 비트 연산자와 함께 상태 관리에 사용 가능
+- `|=` : 상태 추가
+- `&`  : 상태 체크
+- `&= ~` : 상태 제거
+- 쉬프트 연산 (`<<`, `>>`)은 2^n 배수, 몫 계산에 유용
+- 실전에서는 상태, 플래그, 옵션 등 여러 비트를 하나의 int 변수로 관리할 때
