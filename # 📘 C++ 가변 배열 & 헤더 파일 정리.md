@@ -1,0 +1,103 @@
+# 📘 C++ 가변 배열 & 헤더 파일 정리
+
+## 🧩 1. 가변 배열(Dynamic Array) 개념
+
+### ✅ 정적 배열 vs 동적 배열
+| 구분 | 정적 배열 | 동적 배열 |
+|------|-------------|------------|
+| 선언 방식 | `int arr[10];` | `int* arr = new int[10];` |
+| 메모리 위치 | 스택(Stack) | 힙(Heap) |
+| 크기 변경 | ❌ 불가능 | ⭕ 가능(재할당) |
+| 해제 필요 | 자동 해제 | `delete[] arr;` 필요 |
+
+---
+
+## 🧠 2. 가변 배열 확장 로직 흐름
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int size = 0;
+    int* arr = new int[size]; // 초기 0칸 배열
+
+    while (true) {
+        int input;
+        cout << "입력값(-1 입력 시 종료): ";
+        cin >> input;
+        if (input == -1) break; // 종료 조건 예시
+
+        // 새 배열 동적 생성 (기존 크기 + 1)
+        int* temp = new int[size + 1];
+
+        // 기존 arr → temp로 복사
+        for (int i = 0; i < size; i++) {
+            temp[i] = arr[i];
+        }
+
+        // 마지막 칸에 새 입력값 추가
+        temp[size] = input;
+
+        // 기존 메모리 해제 (size가 0일 때는 해제 X)
+        if (size > 0) {
+            delete[] arr;
+        }
+
+        // arr이 새 배열(temp)을 가리키게 함
+        arr = temp;
+
+        // 배열 크기 증가
+        ++size;
+    }
+
+    // 결과 확인
+    cout << "배열 내용: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+
+    // 마지막으로 사용한 힙 메모리 해제
+    delete[] arr;
+    arr = nullptr; // 포인터 초기화 (안전)
+
+    return 0;
+}
+🔍 3. 포인터와 메모리 해제 원리개념설명new힙 메모리에 새 공간을 생성함delete[]힙에 new[]로 만든 배열을 직접 해제함delete vs delete[]new 로 만든 건 delete, new[]로 만든 건 delete[]temp 를 delete 안 하는 이유arr = temp; 로 소유권이 넘어가기 때문 (arr이 해제 책임 가짐)스택에 만든 배열(int a[10])자동 소멸 (delete ❌)⚠️ delete는 “값을 비우는” 게 아니라 “메모리를 시스템에 반환하는 것”!🧱 4. 헤더 파일 구조 (Header File Structure)기본 형태C++// MyHeader.h
+#ifndef MYHEADER_H
+#define MYHEADER_H
+
+// ===== 선언부 =====
+void printHello();
+int sum(int a, int b);
+// =================
+
+#endif // MYHEADER_H
+헤더가드(Header Guard)목적: 같은 헤더가 여러 번 include될 때 중복 선언 오류 방지.구조: #ifndef, #define, #endif 구조로 작성.작명: 매크로 이름은 보통 대문자 + 파일명 기반으로 작성.C++#ifndef FILENAME_H  // FILENAME_H 매크로가 정의되지 않았다면
+#define FILENAME_H  // FILENAME_H 매크로를 정의하라
+// ... 헤더 내용 ...
+#endif              // #ifndef 블록 끝
+🧮 5. 함수 구현 분리파일내용역할main.cpp프로그램 실행 및 호출부함수 사용MyHeader.h함수 선언부(프로토타입)함수의 존재 알림MyHeader.cpp함수 정의부(구현부)함수의 실제 동작C++// MyHeader.cpp
+#include "MyHeader.h" // 헤더 파일 포함 (선언 확인용)
+#include <iostream>
+using namespace std;
+
+void printHello() {
+    cout << "Hello!" << endl;
+}
+
+int sum(int a, int b) {
+    return a + b;
+}
+C++// main.cpp
+#include "MyHeader.h" // 헤더 파일 포함 (함수 사용 목적)
+#include <iostream>   // cout 사용 목적
+using namespace std;
+
+int main() {
+    printHello();
+    cout << "Sum: " << sum(3, 5) << endl;
+    return 0;
+}
+🧩 6. 오늘 반드시 이해하고 넘어가야 할 포인트new / delete[] 메모리 할당 및 해제 흐름 정확히 이해하기가변 배열 확장 로직에서 arr = temp; 가 의미하는 “소유권 이전” 개념while문 반복 시 temp의 역할과 메모리 누수 방지 로직 (이전 arr 해제)헤더가드(#ifndef...)의 필요성과 구조main / .h / .cpp 파일 분리 구조의 의도 (선언과 정의 분리)🧠 7. 문제 풀 때 꼭 정리해야 할 키워드동적할당 (new, delete[])배열 복사 (for문 vs memcpy - memcpy는 아직 안 배웠을 수 있음)포인터 주소 변경 (arr = temp;)메모리 누수(Memory Leak)헤더 파일 구조 및 선언/정의 분리전처리기 지시문 (#ifndef, #define, #endif, #include)🗂️ 8. 보너스: 흔한 실수 정리실수 코드문제 원인결과delete arr; (배열 포인터에)배열은 delete[]로 해제해야 함미정의 동작 (Undefined Behavior), 메모리 누수delete[] arr; (스택 배열에)스택 메모리에 delete 사용 불가프로그램 오류 (Crash)delete[] temp; (arr = temp 후)이미 arr로 소유권 이동 후 이중 해제 위험프로그램 오류 (Crash)헤더(.h)에 함수 정의(구현) 작성여러 .cpp 파일에서 포함 시 중복 정의 에러컴파일 에러
