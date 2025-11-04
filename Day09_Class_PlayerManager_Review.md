@@ -1,0 +1,199 @@
+# 🧩 C++ 클래스 심화 정리 - PlayerManager 구현
+
+## 📅 학습 날짜
+2025-11-04
+
+## 📖 학습 주제
+- 클래스 간 관계 (`Player`, `PlayerManager`)
+- 동적 배열(`new[]`, `delete[]`)
+- 깊은 복사 구조의 기초
+- 메모리 관리 순서
+
+---
+
+## 🧠 주요 개념 정리
+
+### 1. 클래스 간 관계
+- **`Player` 클래스** : 캐릭터 개체 하나를 정의 (이름, HP, MP)
+- **`PlayerManager` 클래스** : 여러 Player 객체를 “배열로” 관리
+
+👉 즉, **`PlayerManager`가 Player를 관리하는 상위 개념**.
+
+---
+
+### 2. 동적 배열 관리 구조
+
+| 구분 | 설명 |
+|------|------|
+| `Player* m_pList` | Player 객체 배열을 가리키는 포인터 |
+| `m_iCount` | 현재 등록된 플레이어 수 |
+| 생성자 | `m_pList`를 `nullptr`, `m_iCount`를 `0`으로 초기화 |
+| 소멸자 | `delete[]`로 동적 메모리 해제 후 포인터 초기화 |
+
+> 💡 **포인터를 사용해 동적 배열을 만들고,**
+> 새로운 데이터를 추가할 때마다 “새 배열 생성 → 복사 → 교체”를 수행한다.
+
+---
+
+### 3. AddPlayer() 함수 구조
+```cpp
+void AddPlayer(const Player& p)
+{
+    Player* newArr = new Player[m_iCount + 1];
+
+    if (m_pList != nullptr)
+    {
+        for (int i = 0; i < m_iCount; ++i)
+            newArr[i] = m_pList[i];
+    }
+
+    newArr[m_iCount] = p;   // 새 플레이어 추가
+
+    delete[] m_pList;       // 기존 배열 해제
+    m_pList = newArr;       // 새 배열로 교체
+    m_iCount++;             // 카운트 증가
+}
+```
+
+#### 🔍 이해 포인트
+- `m_iCount + 1`: 새로운 요소 한 칸 추가
+- 복사 순서: **기존 복사 → 새 데이터 추가 → 기존 메모리 해제**
+- 메모리 누수 방지를 위해 **delete[] → 대입 → count 증가** 순서 유지 필수
+
+---
+
+### 4. ShowAll() 함수 구조
+```cpp
+void ShowAll() const
+{
+    if (m_pList == nullptr || m_iCount == 0)
+    {
+        std::cout << "등록된 플레이어가 없습니다.\n";
+        return;
+    }
+
+    for (int i = 0; i < m_iCount; ++i)
+        m_pList[i].PrintInfo();
+}
+```
+
+#### 💡 핵심
+- 조건문은 **for문 밖에 배치**해야 함.
+- 비어 있을 때는 조기 리턴 (`return`)으로 흐름 정리.
+
+---
+
+## ⚙️ 전체 코드
+
+```cpp
+#include <iostream>
+#include <string>
+
+class Player
+{
+    std::string name;
+    int hp;
+    int mp;
+
+public:
+    Player() : name(""), hp(100), mp(50) {}
+
+    void SetData(const std::string& n, int h, int m)
+    {
+        name = n;
+        hp = h;
+        mp = m;
+    }
+
+    void PrintInfo() const
+    {
+        std::cout << "Name: " << name << " HP: " << hp << " MP: " << mp << '\n';
+    }
+};
+
+class PlayerManager
+{
+    Player* m_pList;
+    int m_iCount;
+
+public:
+    PlayerManager() : m_pList(nullptr), m_iCount(0) {}
+
+    ~PlayerManager()
+    {
+        delete[] m_pList;
+        m_pList = nullptr;
+    }
+
+    void AddPlayer(const Player& p)
+    {
+        Player* newArr = new Player[m_iCount + 1];
+
+        if (m_pList != nullptr)
+        {
+            for (int i = 0; i < m_iCount; ++i)
+                newArr[i] = m_pList[i];
+        }
+
+        newArr[m_iCount] = p;
+
+        delete[] m_pList;
+        m_pList = newArr;
+        m_iCount++;
+    }
+
+    void ShowAll() const
+    {
+        if (m_pList == nullptr || m_iCount == 0)
+        {
+            std::cout << "등록된 플레이어가 없습니다.\n";
+            return;
+        }
+
+        for (int i = 0; i < m_iCount; ++i)
+            m_pList[i].PrintInfo();
+    }
+};
+
+int main()
+{
+    PlayerManager pm;
+    Player p1, p2, p3;
+
+    p1.SetData("철수", 100, 30);
+    p2.SetData("영희", 120, 40);
+    p3.SetData("민수", 80, 20);
+
+    pm.AddPlayer(p1);
+    pm.AddPlayer(p2);
+    pm.AddPlayer(p3);
+
+    pm.ShowAll();
+    return 0;
+}
+```
+
+---
+
+## 🧩 오늘 막혔던 부분과 해결 요약
+
+| 구분 | 막힌 이유 | 해결 포인트 |
+|------|------------|--------------|
+| `m_iCount + 1` 의미 | 인덱스 기준으로 헷갈림 | 배열 크기를 1 늘려 새 플레이어를 추가하기 위함 |
+| 복사 순서 | `for`문 안에서 잘못된 위치에 코드 작성 | `for`문 밖에서 새 요소 추가 (`newArr[m_iCount] = p`) |
+| `ShowAll()` | if문 위치 오류 | for문 전에 조건 검사 후 리턴 |
+| 동적할당 이해 | 단일 객체 vs 배열 혼동 | `new Player[]` / `delete[]` 반드시 짝지어서 사용 |
+
+---
+
+## 🧱 학습 피드백
+- 구조적으로 “클래스 관리자를 통해 객체 배열을 다루는 로직”을 정확히 구현함.
+- 오늘의 포인트는 **“메모리 복사 순서와 흐름 이해”**.
+- 다음 학습으로 **복사 생성자 / 깊은 복사** 개념을 이어가면 자연스럽게 확장됨.
+
+---
+
+## ✅ 다음 단계 예고
+- 복사 생성자(`Copy Constructor`)
+- 대입 연산자 오버로딩(`operator=`)
+- 동적 객체 배열에서 “깊은 복사” 구현 실습
