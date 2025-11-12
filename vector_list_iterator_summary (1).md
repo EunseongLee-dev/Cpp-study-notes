@@ -1,0 +1,96 @@
+## C++ 벡터(Vector), 리스트(List), 이터레이터(Iterator) 정리
+
+### 1. 벡터(Vector)
+- 동적 배열로, 원소 추가/삭제 가능
+- 기본 사용법
+```cpp
+std::vector<int> v;
+v.push_back(10); // 원소 추가
+int x = v[0]; // 인덱스로 접근 가능
+```
+- `size()` : 현재 원소 개수
+- `capacity()` : 현재 할당된 최대 공간
+- `reserve(n)` : 미리 n개 공간 확보 가능, 성능 최적화용
+- 내부 구조: 공간 부족 시 **자동 재할당** 후 기존 데이터 복사
+- 직접 구현할 일은 거의 없고, 주로 `push_back`, `erase`, `insert` 정도 활용
+
+### 2. 리스트(List)
+- 연결 리스트 구조, 삽입/삭제가 빠름
+- 인덱스 접근 불가 → iterator로 순회 필요
+- 기본 사용법
+```cpp
+std::list<int> l;
+l.push_back(20);
+for(auto it = l.begin(); it != l.end(); ++it) { std::cout << *it; }
+```
+- iterator로만 순회 가능
+- 특정 위치로 이동 시 `std::advance(it, n)` 사용
+- 용량 제한 없음, 원소 추가시 항상 새 노드 생성
+
+### 3. 이터레이터(Iterator)
+- 벡터/리스트 순회용 포인터 개념
+- 벡터: `it + n` 가능, 리스트: `advance(it, n)` 사용
+- 반복문에서 ++it를 사용하면 **현재 위치를 다음으로 이동**
+- 조건문 안에서도 ++/advance 가능, 외부에서 특정 위치로 이동할 때만 advance 사용
+- 예시
+```cpp
+auto it = v.begin();
+++it; // 다음 원소로 이동
+std::advance(it, 2); // 리스트의 경우만 안전하게 이동 가능
+```
+
+### 4. erase 사용법
+- 벡터/리스트에서 원소 삭제
+- erase 후 반환값: 삭제된 원소 다음 위치 iterator
+- 예시 (벡터)
+```cpp
+for(auto it = v.begin(); it != v.end(); ) {
+    if(*it < 60) it = v.erase(it);
+    else ++it;
+}
+```
+- **주의:** 단순히 `erase(it);`만 하면 반복문에서 iterator가 유효하지 않아 오류 발생
+
+### 5. 템플릿 함수(Template Function)
+- 다양한 타입에 대해 재사용 가능
+- 매개변수는 `const &`로 받으면 **복사 없이 참조** 가능
+- 예: 두 컨테이너의 원소 비교 함수
+```cpp
+template<typename T>
+bool isEqual(const T& a, const T& b) { /* size 비교, iterator 순회 */ }
+```
+- 함수 안에서는 실제 원소의 멤버가 아닌 **컨테이너에서 제공하는 함수(size, begin 등)** 사용
+
+### 6. 정리 포인트
+1. **벡터 vs 리스트**
+   - 벡터: 인덱스 접근 가능, capacity 있음
+   - 리스트: 인덱스 접근 불가, iterator로만 순회
+2. **이터레이터 사용법**
+   - ++ 연산: 다음 원소로 이동
+   - advance: 특정 위치로 이동
+   - erase 후 반환값으로 iterator 갱신 필요
+3. **반복문 활용**
+   - for문에서 ++/advance 후 사용 시 위치가 정확히 계산되도록 주의
+   - 조건문 안에서 iterator 증감도 가능, 하지만 외부 루프에서 다시 위치 계산 필요
+4. **템플릿 함수**
+   - 타입 독립적인 재사용 가능
+   - 컨테이너가 실제로 전달될 때 size(), begin() 같은 멤버 활용 가능
+5. **정렬(Sort)**
+   - 벡터: `std::sort(begin, end)`
+   - 리스트: `list.sort()`
+   - 직접 구현은 학습 목적, 실무에서는 STL 사용
+6. **백터 최대 수용 크기**
+   - 자동 재할당, 일반적으로 직접 조정할 일 거의 없음
+   - 필요 시 `reserve()`로 성능 최적화 가능
+
+### 7. 오늘 학습 정리
+- 벡터/리스트 기본 사용 숙달
+- iterator 직접/auto 방식 숙달
+- erase 사용 시 주의 사항 확인
+- 템플릿 함수 이해 및 활용
+- 정렬 원리 이해, STL 정렬 활용법 숙지
+- advance와 ++ 차이 이해, 리스트 순회 시 활용법 확인
+
+---
+**깃허브 업로드용 완료**
+
