@@ -1,0 +1,137 @@
+# C++ Map & std::pair 정리
+
+## 1. 구조체 정의
+- `stdinfo` 구조체로 학생 정보 관리
+```cpp
+struct stdinfo
+{
+    std::wstring name;
+    int age;
+    unsigned char gender;
+
+    stdinfo(std::wstring _name, int _age, unsigned char _gender)
+        : name{_name}, age{_age}, gender{_gender} {}
+};
+```
+- 이름, 나이, 성별 정보를 깔끔하게 묶어 사용 가능
+
+---
+
+## 2. map 기본 사용
+- 선언: `std::map<KeyType, ValueType>`  
+  예: `std::map<std::wstring, stdinfo> students;`
+- 특징
+  - 키(key) 기준으로 정렬되어 저장
+  - 중복 key는 자동으로 삽입되지 않음
+  - 삽입, 검색, 삭제, 순회 가능
+
+---
+
+## 3. 삽입
+### 3-1. insert
+```cpp
+students.insert(std::make_pair(L"홍길동", info));
+```
+- `make_pair(key, value)` 필요
+- 반환값: `std::pair<iterator,bool>`  
+  - `iterator` → 삽입 위치
+  - `bool` → 삽입 성공 여부
+
+### 3-2. emplace (권장)
+```cpp
+students.emplace(L"이지혜", info2);
+```
+- `make_pair` 불필요
+- 생성과 동시에 삽입
+- 반환값도 `std::pair<iterator,bool>` 형태 → 삽입 성공 여부 확인 가능
+
+### 3-3. try_emplace
+```cpp
+auto result = students.try_emplace(L"홍길동", info);
+if (!result.second) {
+    std::wcout << L"이미 존재하는 학생입니다." << std::endl;
+}
+```
+- 키가 이미 존재하면 삽입하지 않고 `second == false`
+- 새 키만 삽입 → 기존 객체를 복사/이동하지 않음
+
+---
+
+## 4. 검색
+```cpp
+auto it = students.find(L"홍길동");
+if (it == students.end()) {
+    std::wcout << L"학생 없음" << std::endl;
+} else {
+    std::wcout << it->second.name << std::endl;
+}
+```
+- `find(key)` → 존재하면 iterator 반환, 없으면 `end()`
+- 반환값
+  - `first` → key
+  - `second` → value(`stdinfo` 구조체)
+
+---
+
+## 5. 삭제
+```cpp
+auto it = students.find(L"김무리");
+if (it != students.end()) {
+    students.erase(it);
+} else {
+    std::wcout << L"삭제할 학생 없음" << std::endl;
+}
+```
+- erase(key) 또는 erase(iterator)
+- 존재 여부 체크 후 삭제 권장
+
+---
+
+## 6. 순회
+### 6-1. iterator 사용
+```cpp
+for (auto it = students.begin(); it != students.end(); ++it) {
+    std::wcout << it->second.name << std::endl;
+}
+```
+### 6-2. 구조분해 (C++17)
+```cpp
+for (const auto& [key, val] : students) {
+    std::wcout << val.name << std::endl;
+}
+```
+- `const auto&` 사용 시 원본 map 수정 방지, 레퍼런스로 접근
+- `[key, val]` → key, value를 바로 사용 가능
+
+---
+
+## 7. 문자열 key 비교
+- map 내부는 BST 또는 Red-Black Tree 기반
+- 문자열 비교
+  - 사전식 순서(lexicographical order)
+  - 동일한 prefix가 있으면 길이 짧은 문자열이 먼저
+  - 예: `"홍길동" < "홍길동이"` → true
+
+---
+
+## 8. 동명이인 처리
+- map은 **동일 key 삽입 불가**
+- 이미 존재 여부 체크 후 메시지 출력 가능
+- `try_emplace` 반환값 `second` 활용
+
+---
+
+## 9. 메모 / 주의 사항
+- 삽입: insert vs emplace vs try_emplace 차이 이해
+- find: 없는 키 → end() 반환
+- 순회: iterator, 구조분해, auto 활용 가능
+- 삭제: 존재 여부 확인 후 erase
+- key 비교: 문자열 사전식 순서, 첫 글자만 보는 게 아님, 길이 포함
+
+---
+
+## 10. 추천 방식
+- **삽입**: `try_emplace` 권장 (중복 체크 + 성능 최적화)
+- **순회**: 구조분해 `[key, val]` + `const auto&`
+- **검색/삭제**: `find` 후 존재 여부 체크
+- **코드 깔끔함**: 반복되는 학생 출력, 삽입 처리 등 함수화 권장
