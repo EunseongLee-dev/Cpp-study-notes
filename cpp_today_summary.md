@@ -1,0 +1,119 @@
+# C++ 오늘 학습 정리
+
+## 1. 배열과 포인터
+- 배열 이름은 **배열의 시작 주소**를 의미
+- 함수에 배열을 넘길 때 `int* arr` 로 받으면:
+  - 실제로는 배열이 포인터로 변환되어 전달됨
+  - 함수 안에서 `arr[i]`로 접근 가능 → 실제 배열 요소에 접근
+- 예시:
+```cpp
+void printArr(int* arr, int size) {
+    for(int i = 0; i < size; ++i)
+        std::cout << arr[i] << " ";
+}
+int main() {
+    int score[5] = {10, 20, 30, 40, 50};
+    printArr(score, 5);
+}
+```
+- `&` 사용
+  - 변수 앞: 주소 반환
+  - 벡터/참조: `&` 뒤 → 레퍼런스, 함수 안에서 원본 수정 가능
+
+## 2. 동적할당 vs STL 벡터
+- 동적할당
+```cpp
+int* score = new int[stud];
+// 사용 후
+delete[] score;
+```
+- STL 벡터
+```cpp
+std::vector<int> score;
+score.push_back(100);
+```
+- 차이
+  - `new` → 직접 `delete` 필요
+  - `vector` → 자동 메모리 관리
+- 함수에 넘길 때
+  - 동적배열: `int* arr`
+  - vector: `std::vector<int>& v` (수정 가능), `const std::vector<int>& v` (읽기 전용)
+
+## 3. 함수에서 배열 처리
+- 배열 자체가 포인터처럼 작동
+- `arr[i]`는 내부적으로 `*(arr + i)`와 동일
+- 단일 int 변수는 주소를 받을 수 있지만 굳이 포인터가 필요 없음
+
+## 4. 다형성(Polymorphism) & 가상 함수
+- 부모 클래스 포인터로 자식 객체를 가리킬 수 있음
+```cpp
+CParent* p = &child; 
+p->Output(); // virtual 덕분에 자식 함수 호출
+```
+- 자식 고유 함수는 부모 포인터로 직접 호출 불가
+- 필요 시 **다운 캐스팅**
+```cpp
+CChild* c = dynamic_cast<CChild*>(p);
+if(c) c->childOnlyFunc();
+```
+- dynamic_cast 목적
+  - 부모 포인터가 실제로 자식 타입인지 런타임에 확인
+  - 안전하게 자식 클래스 접근
+  - nullptr 체크를 통해 조건적으로 호출 가능
+
+## 5. 순수 가상 함수
+- 부모 클래스에서 선언만 하고 구현을 강제
+```cpp
+virtual void func() = 0; // pure virtual
+```
+- 장점
+  - 자식 클래스가 반드시 구현하도록 강제
+  - 상속 관계에서 인터페이스 역할 가능
+- 구현이 있는 가상 함수(`{}`)는 자식이 구현하지 않아도 부모 함수 호출 가능
+
+## 6. 템플릿
+- 자료형에 독립적인 코드를 작성할 때 사용
+```cpp
+template <typename T>
+T add(T a, T b) {
+    return a + b;
+}
+```
+- 사용
+```cpp
+int x = add<int>(3, 4);
+double y = add<double>(1.2, 3.4);
+```
+
+## 7. C++11 범위 기반 for문
+```cpp
+std::vector<int> v = {1,2,3};
+for(int n : v)
+    std::cout << n;
+```
+- 의미: **v의 모든 요소를 순회**
+- 일반 배열에서도 동일하게 사용 가능
+
+## 8. 오늘 문제 풀이 요약
+- 최고 점수 찾기
+  - 단순 반복문으로 비교
+```cpp
+int maxvalue = arr[0];
+for(int i = 1; i < size; ++i)
+    if(arr[i] > maxvalue)
+        maxvalue = arr[i];
+```
+- 평균 점수
+```cpp
+int sum = 0;
+for(int i = 0; i < size; ++i) sum += arr[i];
+int avg = sum / size;
+```
+
+## 9. 핵심 학습 포인트
+- 포인터와 배열: 주소와 실제 값 접근 구분
+- 다형성: 부모 포인터 + 가상함수 → 다양한 자식 객체를 처리
+- dynamic_cast: 안전한 다운 캐스팅, nullptr 체크 필수
+- 템플릿: 타입에 독립적인 코드 작성
+- vector & 레퍼런스: 동적 배열과 메모리 관리, 함수 전달 시 원본 수정 가능
+- 범위 기반 for문: iterator 없이 간
