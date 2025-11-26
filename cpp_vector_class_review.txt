@@ -1,0 +1,109 @@
+# C++ Vector & Class 문제풀이 정리
+
+## 1. Student 클래스
+```cpp
+class Student {
+protected:
+    std::string name;
+    int score;
+
+public:
+    Student() : name(), score(0) {}
+    Student(const std::string& n, int s) : name(n), score(s) {}
+
+    std::string GetName() const { return name; }
+    int GetScore() const { return score; }
+
+    void Print() const {
+        std::cout << "이름: " << name << ", 점수: " << score << "\n";
+    }
+};
+```
+- 생성자 오버로딩: 기본 생성자 / 이름과 점수 받는 생성자
+- Getter 함수: 멤버 변수 직접 접근 대신 사용
+- Print 함수: 학생 정보 출력
+
+## 2. StudentManager 클래스
+- Vector<Student>를 내부 저장소로 사용
+- 기능: AddStudent, PrintAll, GetMaxScore, PrintAboveScore 등
+
+```cpp
+class StudentManager {
+private:
+    std::vector<Student> stud;
+
+public:
+    void AddStudent(const std::string& name, int score) {
+        if (stud.size() >= 20) {
+            std::cout << "20명을 초과하였습니다.\n";
+            return;
+        }
+        stud.push_back(Student(name, score));
+    }
+
+    void PrintAll() const {
+        std::cout << "입력된 학생 리스트\n";
+        for (const auto& s : stud) {
+            s.Print();
+        }
+    }
+
+    int GetMaxScore() const {
+        if (stud.empty()) return -1;
+        int maxScore = stud[0].GetScore();
+        for (const auto& s : stud) {
+            if (s.GetScore() > maxScore) maxScore = s.GetScore();
+        }
+        return maxScore;
+    }
+
+    void PrintAboveScore(int minScore) const {
+        if (stud.empty()) {
+            std::cout << "저장된 학생이 없습니다.\n";
+            return;
+        }
+        bool found = false;
+        for (const auto& s : stud) {
+            if (s.GetScore() >= minScore) {
+                s.Print();
+                found = true;
+            }
+        }
+        if (!found) std::cout << minScore << "점 이상 득점자가 없습니다.\n";
+    }
+};
+```
+- Vector 순회: `auto&`로 참조 사용 → 원본 수정 가능 / const 추가 → 수정 불가
+- 최고점 계산: 단순 비교 반복
+- 조건 출력: for문 안에서 한 명이라도 충족하면 bool flag 사용
+
+## 3. Vector 순회 & 접근 정리
+- 범위 기반 for문: `for(auto& s : stud)` → 원본 Student 객체 참조
+- 객체 접근: `.` 연산자 사용 가능
+- 포인터 접근: `->` 연산자 사용 (`it->GetScore()`)
+- auto vs auto&
+  - auto: 복사본 생성 → 원본 수정 불가
+  - auto&: 참조 → 원본 수정 가능
+
+## 4. 주요 개념 정리
+- 포인터와 배열
+  - 배열 이름 → 시작 주소를 가짐
+  - 함수 매개변수에서 `int* arr` → 배열의 주소를 전달받아 사용
+  - `arr[i]` → *(arr + i) 와 동일
+- 레퍼런스 (&)
+  - `Type&` → 원본 접근, 수정 가능
+  - `const Type&` → 원본 접근, 수정 불가 (읽기 전용)
+- 동적할당
+  - `int* arr = new int[size];` → 사용 후 `delete[] arr;` 필요
+  - vector 사용 → 자동 관리, delete 불필요
+- StudentManager에서 vector<Student>&를 매개변수로 받으면 원본 수정 가능
+- 범위 기반 for문과 iterator 차이
+  - `auto& s : stud` → 객체 자체 참조 → `.` 사용
+  - `for(auto it = stud.begin(); it != stud.end(); ++it)` → iterator → `->` 사용
+
+## 5. 문제풀이 팁
+1. 벡터에 객체를 저장할 때는 push_back(Student(...)) 사용
+2. 최고점/평균 계산 시 Student의 score를 Getter로 가져와야 함
+3. 조건 출력 시 한 명도 없는 경우 체크용 bool flag 사용
+4. 포인터, 레퍼런스, 객체 접근 연산자 차이를 반드시 구분
+5. 범위 기반 for문은 내부에서 객체를 참조 또는 복사하여 편하게 사용 가능
