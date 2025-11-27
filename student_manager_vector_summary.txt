@@ -1,0 +1,93 @@
+# C++ 학생 관리 프로그램 - 벡터 기반 학습 정리
+
+## 1. 주요 개념
+
+### 1.1 클래스와 생성자
+- `Student` 클래스
+  - 멤버 변수: `name`, `score`
+  - 생성자: `Student(std::string n, int s)` → 멤버 변수 초기화
+  - Getter 함수:
+    ```cpp
+    const std::string& Getname() const;
+    const int Getscore() const;
+    ```
+    - `const`를 사용하여 읽기 전용 접근
+
+### 1.2 벡터
+- `std::vector<Student> students;`
+  - `push_back`과 `emplace_back` 차이
+    - `push_back(Student(...))` → 객체 생성 후 복사/이동
+    - `emplace_back(...)` → 벡터 안에서 바로 생성, 효율적
+- 범위 기반 for문
+  ```cpp
+  for (const auto& s : students)
+      std::cout << s.Getname() << " " << s.Getscore();
+  ```
+- 이터레이터 방식
+  ```cpp
+  for (auto it = students.begin(); it != students.end(); ++it)
+      std::cout << it->Getname() << it->Getscore();
+  ```
+  - 객체 접근 시 `->` 사용 (포인터처럼 동작)
+
+### 1.3 bool 변수와 if 조건
+- `bool fal = false;`
+- `if (!fal)` → fal이 `false`일 때 실행
+- 논리 연산자 `!`는 조건 반전
+- if 조건은 **기본적으로 true일 때만 실행**
+
+## 2. 함수별 정리
+
+### 2.1 Add 함수
+```cpp
+void Add(const std::string& _name, int _score)
+{
+    students.emplace_back(_name, _score);
+}
+```
+- 벡터에 새로운 학생 객체를 추가
+- `emplace_back`을 사용하여 효율적으로 생성
+
+### 2.2 Target 함수 (조건 검색)
+```cpp
+void Target(const std::string& _name, int _score);
+```
+- 이름과 최소 점수 조건 만족하는 학생 검색
+- 한 명이라도 만족하면 메시지 출력 후 `break`
+- 없으면 `!fal` 조건으로 "조건 만족 학생 없음" 출력
+
+### 2.3 Getstud 함수 (점수 분류)
+- 특정 점수 이상 학생을 출력
+- 첫 번째 학생만 출력 후 return
+
+### 2.4 Hilev 함수 (최고 점수 학생)
+- `students` 벡터에서 최고 점수 학생 탐색
+- `for (const auto& it : students)` 사용
+- 객체 접근: `it.Getname()`, `it.Getscore()`
+
+### 2.5 totrscore 함수 (평균 점수)
+- 전체 점수 합산 후 벡터 크기로 나눠 평균 계산
+- `for (const auto& it : students)` 반복
+
+## 3. 주요 학습 포인트
+
+1. **벡터에 객체 저장**
+   - 자료형이 Student일 때 `(name, score)`가 아니라 `Student(name, score)` 혹은 `emplace_back(name, score)` 사용
+2. **범위 기반 for문과 이터레이터**
+   - `auto&` 또는 `const auto&` → 원본 접근, 복사 방지
+   - 이터레이터 사용 시 `->` 연산자로 멤버 접근
+3. **bool 변수와 if 조건 처리**
+   - 초기값 설정과 논리 반전 연산자(!) 사용 이해
+4. **객체 지향 개념**
+   - 생성자, Getter, 벡터 활용 등 기본적인 클래스 구조 연습
+5. **로직 개선 포인트**
+   - 조건 검색 시 한 명도 없을 때 메시지 출력: bool flag 사용
+   - 범위 기반 for문과 이터레이터 방식 모두 연습 필요
+
+---
+
+> 다음 단계 학습 추천:
+> - 벡터 대신 리스트 연습
+> - 템플릿 함수로 평균 계산 일반화
+> - Student 클래스 상속 및 다형성 적용
+> - 메뉴 확장 및 추가 기능 구현
